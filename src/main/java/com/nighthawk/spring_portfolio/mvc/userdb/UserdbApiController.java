@@ -23,39 +23,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.Getter;
 
-/**
- * This class provides RESTful API endpoints for managing Userdb entities.
- * It includes endpoints for creating, retrieving, updating, and deleting Userdb entities.
- */
 @RestController
 @RequestMapping("/api")
 public class UserdbApiController {
 
-    /**
-     * Repository for accessing Userdb entities in the database.
-     */
     @Autowired
     private UserdbJpaRepository repository;
 
-    /**
-     * Service for managing Userdb entities.
-     */
     @Autowired
     private UserdbDetailsService userdbDetailsService;
 
-    /**
-     * Retrieves a Userdb entity by current user of JWT token.
-     * @return A ResponseEntity containing the Userdb entity if found, or a NOT_FOUND status if not found.
-     */
     @GetMapping("/userdb")
     public ResponseEntity<Userdb> getUserdb(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();  // Email is mapped/unmapped to username for Spring Security
 
-        // Find a userdb by username
         Userdb userdb = repository.findByEmail(email);
 
-        // Return the userdb if found
         if (userdb != null) {
             return new ResponseEntity<>(userdb, HttpStatus.OK);
         } else {
@@ -63,67 +47,42 @@ public class UserdbApiController {
         }
     }
 
-    /**
-     * Retrieves all the Userdb entities in the database, userdb
-     * @return A ResponseEntity containing a list for Userdb entities 
-     */
     @GetMapping("/userdbs")
     public ResponseEntity<List<Userdb>> getUserdbs() {
         return new ResponseEntity<>( repository.findAllByOrderByNameAsc(), HttpStatus.OK);
     }
 
-    /**
-     * Retrieves a Userdb entity by its ID.
-     *
-     * @param id The ID of the Userdb entity to retrieve.
-     * @return A ResponseEntity containing the Userdb entity if found, or a NOT_FOUND status if not found.
-     */
+
     @GetMapping("/userdb/{id}")
     public ResponseEntity<Userdb> getUserdb(@PathVariable long id) {
         Optional<Userdb> optional = repository.findById(id);
-        if (optional.isPresent()) {  // Good ID
-            Userdb userdb = optional.get();  // value from findByID
-            return new ResponseEntity<>(userdb, HttpStatus.OK);  // OK HTTP response: status code, headers, and body
+        if (optional.isPresent()) {
+            Userdb userdb = optional.get();
+            return new ResponseEntity<>(userdb, HttpStatus.OK);
         }
-        // Bad ID
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);       
     }
 
-    /**
-     * Delete a Userdb entity by its ID.
-     *
-     * @param id The ID of the Userdb entity to delete.
-     * @return A ResponseEntity containing the Userdb entity if deleted, or a NOT_FOUND status if not found.
-     */
     @DeleteMapping("/userdb/{id}")
     public ResponseEntity<Userdb> deleteUserdb(@PathVariable long id) {
         Optional<Userdb> optional = repository.findById(id);
-        if (optional.isPresent()) {  // Good ID
-            Userdb userdb = optional.get();  // value from findByID
-            repository.deleteById(id);  // value from findByID
-            return new ResponseEntity<>(userdb, HttpStatus.OK);  // OK HTTP response: status code, headers, and body
+        if (optional.isPresent()) {
+            Userdb userdb = optional.get();
+            repository.deleteById(id);
+            return new ResponseEntity<>(userdb, HttpStatus.OK);
         }
-        // Bad ID
         return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
     }
 
-    /* DTO (Data Transfer Object) to support POST request for postUserdb method
-       .. represents the data in the request body
-     */
     @Getter 
     public static class UserdbDto {
         private String email;
         private String password;
         private String name;
         private String dob;
-        private Integer credits; // Include credits in the DTO
+        private Integer credits;
     }
 
-    /**
-     * Create a new Userdb entity.
-     * @param userdbDto
-     * @return A ResponseEntity containing a success message if the Userdb entity is created, or a BAD_REQUEST status if not created.
-     */
     @PostMapping("/userdb")
     public ResponseEntity<Object> postUserdb(@RequestBody UserdbDto userdbDto) {
         // Validate dob input
