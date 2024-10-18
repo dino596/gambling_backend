@@ -30,10 +30,6 @@ import lombok.Getter;
 @RestController
 @RequestMapping("/api")
 public class UserdbApiController {
-    /*
-    #### RESTful API REFERENCE ####
-    Resource: https://spring.io/guides/gs/rest-service/
-    */
 
     /**
      * Repository for accessing Userdb entities in the database.
@@ -66,7 +62,7 @@ public class UserdbApiController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
+
     /**
      * Retrieves all the Userdb entities in the database, userdb
      * @return A ResponseEntity containing a list for Userdb entities 
@@ -120,6 +116,7 @@ public class UserdbApiController {
         private String password;
         private String name;
         private String dob;
+        private Integer credits; // Include credits in the DTO
     }
 
     /**
@@ -137,7 +134,7 @@ public class UserdbApiController {
             return new ResponseEntity<>(userdbDto.getDob() + " error; try MM-dd-yyyy", HttpStatus.BAD_REQUEST);
         }
         // A userdb object WITHOUT ID will create a new record in the database
-        Userdb userdb = new Userdb(userdbDto.getEmail(), userdbDto.getPassword(), userdbDto.getName(), dob, userdbDetailsService.findRole("USER"));
+        Userdb userdb = new Userdb(userdbDto.getEmail(), userdbDto.getPassword(), userdbDto.getName(), dob, userdbDetailsService.findRole("USER"), userdbDto.getCredits());
         userdbDetailsService.save(userdb);
         return new ResponseEntity<>(userdbDto.getEmail() + " is created successfully", HttpStatus.CREATED);
     }
